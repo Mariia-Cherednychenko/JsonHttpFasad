@@ -11,18 +11,20 @@ public class JsonHttpFacade {
    ObjectMapper mapper = new ObjectMapper();
 
 
-   public UserResponse get(String s, Class<UserResponse> userResponseClass) {
+   public <T> T get(String s, Class<T> responseClass) {
 
        HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(s))
                 .GET()
                 .header("Authorization", "Bearer ")
+               .header("Accept", "application/json")
                 .build();
 
        try {
-           HttpResponse<String> response =httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-           UserResponse userResponse = mapper.readValue(response.body(), userResponseClass);
-           return userResponse;
+           HttpResponse<String> httpResponse =httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+           System.out.println(httpResponse.body());
+          T response = mapper.readValue(httpResponse.body(), responseClass);
+           return response;
     }
        catch (InterruptedException | IOException e) {
            e.printStackTrace();
@@ -33,7 +35,7 @@ public class JsonHttpFacade {
     }
 
 
-    public StatusResponse post(String s, CreateUserRequest req, Class<StatusResponse> statusResponseClass) {
+    public <T> T post(String s, CreateUserRequest req, Class<T> responseClass) {
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(s))
                 .POST(HttpRequest.BodyPublishers.ofString(String.valueOf(req)))
@@ -44,7 +46,51 @@ public class JsonHttpFacade {
 
         try {
             HttpResponse<String> response =httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-            StatusResponse statusResponse = mapper.readValue(response.body(), statusResponseClass);
+            T statusResponse = mapper.readValue(response.body(), responseClass);
+            return statusResponse;
+        }
+        catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+        }
+
+
+        return null;
+    }
+
+    public <T> T getAuthorized(String s, Class<T> responseClass,String token) {
+
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(s))
+                .GET()
+                .header("Authorization", "Bearer " +token)
+                .build();
+
+        try {
+            HttpResponse<String> httpResponse =httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            T response = mapper.readValue(httpResponse.body(), responseClass);
+            return response;
+        }
+        catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+        }
+
+
+        return null;
+    }
+
+
+    public <T> T postAuthorized(String s, CreateUserRequest req, Class<T> responseClass,String token) {
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(s))
+                .POST(HttpRequest.BodyPublishers.ofString(String.valueOf(req)))
+                .header("Authorization", "Bearer "+ token)
+                .header("Accept", "application/json")
+                .header("Content-Type", "application/json")
+                .build();
+
+        try {
+            HttpResponse<String> response =httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            T statusResponse = mapper.readValue(response.body(), responseClass);
             return statusResponse;
         }
         catch (InterruptedException | IOException e) {

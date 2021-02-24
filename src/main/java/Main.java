@@ -4,7 +4,6 @@ public class Main {
 
 
         JsonHttpFacade jsonHttp = new JsonHttpFacade();
-
         UserResponse resp = jsonHttp.get("http://example.com/users", UserResponse.class);
 
         CreateUserRequest req = new CreateUserRequest(
@@ -17,5 +16,7 @@ public class Main {
                 req,
                 StatusResponse.class
         );
+
+
     }
 }
